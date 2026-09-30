@@ -2,12 +2,10 @@ import { Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { ScanModule } from './scan/scan.module.js';
-import { DBModule } from './db/db.module.js';
-import { RepairLocationsModule } from './repair-locations/repair-locations.module.js';
+import { DatabaseModule } from './database/database.module.js';
 import { CertificationsModule } from './certifications/certifications.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
-import { QuestionsModule } from './questions/questions.module.js';
+import { UsersModule } from './users/users.module.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -44,12 +42,10 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         ttl: 60_000,
       }),
     }),
-    ScanModule,
     ReviewsModule,
     CertificationsModule,
-    RepairLocationsModule,
-    DBModule,
-    QuestionsModule,
+    DatabaseModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
