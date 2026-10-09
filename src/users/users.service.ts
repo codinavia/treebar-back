@@ -23,7 +23,9 @@ export class UsersService {
         ConflictException(`Usuario con huella ${user.huella} ya existe`);
     }
 
-    await this.db.insert(usuario).values(user);
+    await this.db
+      .insert(usuario)
+      .values(user);
   }
 
   async findOne(id: string): Promise<UserDto> {

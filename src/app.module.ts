@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -41,6 +42,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         ],
         ttl: 60_000,
       }),
+    }),
+    ConfigModule.forRoot({
+      envFilePath: '.env.development.local',
     }),
     ReviewsModule,
     CertificationsModule,

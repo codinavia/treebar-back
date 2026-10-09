@@ -96,7 +96,7 @@ export const duda = mysqlTable(
   {
     id: int('id').autoincrement().primaryKey(),
     codigo_producto: varchar('codigo_producto', { length: 50 }).notNull(),
-    pregunta: varchar('pregunta', { length: 500 }).notNull(),
+    pregunta: varchar('pregunta', { length: 100 }).notNull(),
   },
   (table) => [
     foreignKey({
@@ -114,7 +114,7 @@ export const respuesta = mysqlTable(
   {
     id: int('id').autoincrement().primaryKey(),
     id_duda: int('id_duda').notNull(),
-    respuesta: varchar('respuesta', { length: 500 }).notNull(),
+    respuesta: varchar('respuesta', { length: 250 }).notNull(),
   },
   (table) => [
     foreignKey({
@@ -171,7 +171,7 @@ export const relations = defineRelations(
       }),
     },
     duda: {
-      producto: r.one.producto({
+      producto: r.one.producto ({
         from: r.duda.codigo_producto,
         to: r.producto.codigo,
       }),

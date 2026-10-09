@@ -34,16 +34,20 @@ export class ReviewsService {
     }
 
     return this.db.transaction(async (tx) => {
-      await tx.insert(reseña).values({ huella_usuario, codigo_producto });
+      await tx
+        .insert(reseña)
+        .values({ huella_usuario, codigo_producto });
 
-      await tx.insert(criterio_calificacion).values(
-        comentarios.map((c: CommentDto) => ({
-          huella_usuario,
-          codigo_producto,
-          id_criterio: c.id_criterio,
-          comentario: c.comentario,
-          calificacion: c.calificacion,
-        })),
+      await tx
+        .insert(criterio_calificacion)
+        .values(
+          comentarios.map((c: CommentDto) => ({
+            huella_usuario,
+            codigo_producto,
+            id_criterio: c.id_criterio,
+            comentario: c.comentario,
+            calificacion: c.calificacion,
+          })),
       );
   });
 }
