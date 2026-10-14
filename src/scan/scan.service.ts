@@ -21,7 +21,7 @@ const REPAIR_RADIUS_METERS = 500;
 const REPAIR_MAX_RESULTS = 5;
 const PLACES_FIELD_MASK = [
   'places.displayName',
-  'places.routingSummaries.legs.distanceMeters',
+  'routingSummaries.legs.distanceMeters',
 ].join(',');
 
 @Injectable()
@@ -33,38 +33,32 @@ export class ScanService {
     private readonly reviewsService: ReviewsService,
   ) {}
 
-  private readonly logger = new Logger(ScanService.name);
+  // private readonly logger = new Logger(ScanService.name);
 
   private async searchNearbyPlaces(ubicacion: LocationDto) {
+    const origin = {
+      latitude: ubicacion.latitud,
+      longitude: ubicacion.longitud,
+    };
+
     const body = {
-      includedTypes: ['repair service'],
-      maxResultCount: REPAIR_MAX_RESULTS,
-      locationRestriction: {
+      textQuery: 'reparación de celulares computadoras y electrónicos',
+      languageCode: 'es',
+      pageSize: REPAIR_MAX_RESULTS,
+      locationBias: {
         circle: { center: origin, radius: REPAIR_RADIUS_METERS },
       },
       routingParameters: { origin, travelMode: 'WALK' },
     };
 
-    return await this.places.post<Response>('/places:searchNearby', {
-      json: {
-        includedTypes: ['repair service'],
-        maxResultCount: REPAIR_MAX_RESULTS,
-        locationRestriction: {
-          circle: {
-            center: {
-              latitude: ubicacion.latitud,
-              longitude: ubicacion.longitud,
-            },
-            radius: REPAIR_RADIUS_METERS,
-          },
-        },
-      },
-      headers: { 'X-Goog-FieldMask': PLACES_FIELD_MASK, }
+    return await this.places.post<Response>('/places:searchText', {
+      json: body,
+      headers: { 'X-Goog-FieldMask': PLACES_FIELD_MASK },
     });
-  }
+}
 
   private async getProductInfo(barcode: string) {
-    return await this.upc.get<Response>(`/code/${barcode}`, {
+    return await this.upc.get<Response>('/:barcode', {
         params: { barcode },
         query: { format: 'true' },
       }
@@ -75,6 +69,9 @@ export class ScanService {
     barcode: string,
     ubicacion: LocationDto,
   ): Promise<ScanResponseDto> {
+    const cached = await this.cache.get<ScanResponseDto>(barcode);
+    if (cached) return cached;
+
     const [producto, reparaciones, reseñas] = await Promise.allSettled([
       this.getProductInfo(barcode),
       this.searchNearbyPlaces(ubicacion),
@@ -93,16 +90,19 @@ export class ScanService {
   }
 
   private valorOrNull<T>(result: PromiseSettledResult<T>, nombre: string): T | null {
-    if (result.status === 'fulfilled') return result.value;
-    this.logger.warn(`Falló la carga de ${nombre}: ${(result.reason as Error)?.message}`);
+    if (result.status === 'fulfilled') 
+      return result.value;
+    // const reason: any = result.reason;
+    // this.logger.warn(
+    //   `Falló la carga de ${nombre}: ${reason?.message}`,
+    //   JSON.stringify(reason?.body ?? reason?.response?.body ?? reason?.data ?? Object.keys(reason ?? {})),
+    // );
     return null;
   }
 
-  private map_product(
-    response: any | null
-  ): ProductDetailsDto | null {
-    if (!response) return null;
-    const { product } = response;
+  private map_product(response: any | null): ProductDetailsDto | null {
+    const product = response?.data?.product;
+    if (!product) return null;
 
     return {
       nombre: product.name,
@@ -116,9 +116,10 @@ export class ScanService {
   }
 
   private map_places(response: any | null): RepairPlaceDto[] {
-    return (response?.places ?? []).map((place: any, i: number) => ({
-      nombre: place.displayName.text,
-      distanciaMetros: response?.routingSummaries?.[i]?.legs?.[0]?.distanceMeters,
+    const data = response?.data;
+    return (data?.places ?? []).map((place: any, i: number) => ({
+      nombre: place.displayName?.text,
+      distanciaMetros: data?.routingSummaries?.[i]?.legs?.[0]?.distanceMeters,
     }));
   }
 }
