@@ -7,11 +7,13 @@ import { DatabaseModule } from './database/database.module.js';
 import { CertificationsModule } from './certifications/certifications.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { UsersModule } from './users/users.module.js';
+import { QueriesModule } from './queries/queries.module.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Keyv } from 'keyv';
 import KeyvRedis from '@keyv/redis';
+import { ScanModule } from './scan/scan.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -50,6 +52,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     CertificationsModule,
     DatabaseModule,
     UsersModule,
+    QueriesModule,
+    ScanModule,
   ],
   controllers: [AppController],
   providers: [

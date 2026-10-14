@@ -11,11 +11,9 @@ import {
   HttpClient,
   InjectHttpClient
 } from '@nestjs/http-client';
-import { ConfigService } from '@nestjs/config';
 import { ReviewsService } from '../reviews/reviews.service.js';
 import { LocationDto } from './dto/location.dto.js';
 import { ProductDetailsDto } from './dto/product-details.dto.js';
-import { GoUpcResponse } from './interfaces/go-upc-response.interface.js';
 import { RepairPlaceDto } from './dto/repair-place.dto.js';
 import { ScanResponseDto } from './dto/scan-response.dto.js';
 
@@ -32,8 +30,6 @@ export class ScanService {
     @Inject(CACHE_MANAGER) private cache: Cache,
     @InjectHttpClient('places') private readonly places: HttpClient,
     @InjectHttpClient('upc') private readonly upc: HttpClient,
-    private readonly http: HttpClient,
-    private readonly config: ConfigService,
     private readonly reviewsService: ReviewsService,
   ) {}
 

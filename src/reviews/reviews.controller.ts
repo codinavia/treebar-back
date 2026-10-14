@@ -21,7 +21,7 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @ApiOperation({ summary: 'Crea una nueva reseña de un producto' })
-  @Post('dejar_reseña')
+  @Post('dejar_resena')
   create(
     @Body() createReviewDto: CreateReviewDto
   ) {
@@ -34,7 +34,7 @@ export class ReviewsController {
     description: 'Lista de preguntas con sus comentarios y calificaciones',
     type: [GetReviewsResponseDto], 
   })
-  @Get(':codigo_producto/:tipo')
+  @Get('producto/:codigo_producto/:tipo')
   findAllByTypeOfCriteria(
     @Param('codigo_producto') codigo_producto: string,
     @Param('tipo') tipo: string
@@ -59,7 +59,7 @@ export class ReviewsController {
     description: 'Lista de preguntas con los comentarios y calificaciones del usuario',
     type: [GetReviewsResponseDto],
   })
-  @Get(':huella_usuario/:codigo_producto')
+  @Get('usuario/:huella_usuario/:codigo_producto')
   findReviewByUser(
     @Param('huella_usuario') huella_usuario: string,
     @Param('codigo_producto') codigo_producto: string

@@ -1,9 +1,6 @@
 import { 
   Injectable, 
-  Inject
 } from '@nestjs/common';
-import { relations } from '../database/schema.js';
-import { MySql2Database } from 'drizzle-orm/mysql2/driver';
 import { Drizzle } from '../database/database.service.js';
 import { CreateQueryDto } from './dto/create-query.dto.js';
 import { GetQueriesResponseDto } from './dto/get-queries-response.dto.js';
@@ -12,17 +9,17 @@ import { duda } from '../database/schema.js';
 @Injectable()
 export class QueriesService {
   constructor(
-    @Inject(Drizzle) private readonly db: MySql2Database<typeof relations>
+    private readonly drizzle: Drizzle
   ) {}
 
   async create(CreateQueryDto: CreateQueryDto) {
-    await this.db
+    await this.drizzle.db
       .insert(duda)
       .values(CreateQueryDto);
   }
 
   async findAll(codigo_producto: string): Promise<GetQueriesResponseDto[]> {
-    return await this.db
+    return await this.drizzle.db
       .query
       .duda
       .findMany({
@@ -44,7 +41,7 @@ export class QueriesService {
     codigo_producto: string, 
     pregunta: string
   ): Promise<GetQueriesResponseDto> {
-    const [result] = await this.db
+    const [result] = await this.drizzle.db
       .query
       .duda
       .findMany({

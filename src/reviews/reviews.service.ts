@@ -1,10 +1,7 @@
 import { 
   Injectable, 
-  Inject,
   ConflictException,
 } from '@nestjs/common';
-import { relations } from '../database/schema.js';
-import { MySql2Database } from 'drizzle-orm/mysql2/driver';
 import { Drizzle } from '../database/database.service.js';
 import { CreateReviewDto } from './dto/create-review.dto.js';
 import { CommentDto } from './dto/comment.dto.js';
@@ -18,7 +15,7 @@ import {
 @Injectable()
 export class ReviewsService {
   constructor(
-    @Inject(Drizzle) private readonly db: MySql2Database<typeof relations>
+    private readonly drizzle: Drizzle
   ) {}
   
   async create(createReviewDto: CreateReviewDto) {
@@ -28,12 +25,12 @@ export class ReviewsService {
       comentarios } 
     = createReviewDto;
 
-    if (await this.findReviewByUser(huella_usuario , codigo_producto)) {
+    if (await this.existsReviewByUser(huella_usuario, codigo_producto)) {
       throw new 
         ConflictException(`El usuario con huella ${huella_usuario} ya ha dejado una reseña para el producto ${codigo_producto}`);
     }
 
-    return this.db.transaction(async (tx) => {
+    return this.drizzle.db.transaction(async (tx) => {
       await tx
         .insert(reseña)
         .values({ huella_usuario, codigo_producto });
@@ -56,7 +53,7 @@ export class ReviewsService {
     codigo_producto: string,
     tipo: string
   ): Promise<GetReviewsResponseDto[]> {
-    const result = await this.db
+    const result = await this.drizzle.db
       .query
       .criterio
       .findMany({
@@ -80,18 +77,40 @@ export class ReviewsService {
   }
 
   async findAllQuestions() {
-    return await this.db
+    return await this.drizzle.db
       .select({
         pregunta: criterio.pregunta
       })
       .from(criterio);
   }
 
+  async existsReviewByUser(
+    huella_usuario: string,
+    codigo_producto: string
+  ): Promise<boolean> {
+    const [review] = await await this.drizzle.db
+      .query
+      .criterio
+      .findMany({
+        with: {
+          calificaciones: {
+            where: { huella_usuario, codigo_producto },  
+          },
+        },
+      });
+    
+    if (!review)
+      return false;
+
+    return true;
+  }
+
   async findReviewByUser(
     huella_usuario: string,
     codigo_producto: string
   ): Promise<GetReviewsResponseDto[]> {
-    return await this.db
+    
+    return await this.drizzle.db
       .query
       .criterio
       .findMany({
