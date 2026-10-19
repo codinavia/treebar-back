@@ -22,6 +22,7 @@ const REPAIR_MAX_RESULTS = 5;
 const PLACES_FIELD_MASK = [
   'places.displayName',
   'routingSummaries.legs.distanceMeters',
+  'places.googleMapsUri' 
 ].join(',');
 
 @Injectable()
@@ -33,7 +34,7 @@ export class ScanService {
     private readonly reviewsService: ReviewsService,
   ) {}
 
-  // private readonly logger = new Logger(ScanService.name);
+  private readonly logger = new Logger(ScanService.name);
 
   private async searchNearbyPlaces(ubicacion: LocationDto) {
     const origin = {
@@ -69,8 +70,16 @@ export class ScanService {
     barcode: string,
     ubicacion: LocationDto,
   ): Promise<ScanResponseDto> {
-    const cached = await this.cache.get<ScanResponseDto>(barcode);
-    if (cached) return cached;
+    
+    let cached: ScanResponseDto | undefined;
+    try {
+      cached = await this.cache.get<ScanResponseDto>(barcode);
+    } catch (err) {
+      this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
+    }
+
+    if (cached) 
+       return cached;
 
     const [producto, reparaciones, reseñas] = await Promise.allSettled([
       this.getProductInfo(barcode),
@@ -84,7 +93,9 @@ export class ScanService {
       reseñas: this.valorOrNull(reseñas, 'reseñas') ?? [],
     };
 
-    await this.cache.set(barcode, result, 3600);
+    this.cache.set(barcode, result, 3600 * 1000).catch((err) =>
+      this.logger.warn(`Cache write failed: ${err?.message}`),
+  );
 
     return result;
   }
@@ -117,9 +128,12 @@ export class ScanService {
 
   private map_places(response: any | null): RepairPlaceDto[] {
     const data = response?.data;
+    // this.logger.debug(`Places API response: ${JSON.stringify(data)}`);
+
     return (data?.places ?? []).map((place: any, i: number) => ({
       nombre: place.displayName?.text,
       distanciaMetros: data?.routingSummaries?.[i]?.legs?.[0]?.distanceMeters,
+      googleMapsUri: place.googleMapsUri,
     }));
   }
 }

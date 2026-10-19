@@ -6,4 +6,7 @@ export class RepairPlaceDto {
 
   @ApiProperty({ description: 'Distancia en metros' })
   distanciaMetros?: number;
+
+  @ApiProperty({ description: 'Enlace a Google Maps' })
+  googleMapsUri?: string;
 }
