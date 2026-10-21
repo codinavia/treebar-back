@@ -1,7 +1,7 @@
 import { 
     Inject, 
     Injectable,
-    Logger,
+    Logger
 } from '@nestjs/common';
 import { 
     CACHE_MANAGER,
@@ -16,13 +16,17 @@ import { LocationDto } from './dto/location.dto.js';
 import { ProductDetailsDto } from './dto/product-details.dto.js';
 import { RepairPlaceDto } from './dto/repair-place.dto.js';
 import { ScanResponseDto } from './dto/scan-response.dto.js';
+import { Drizzle } from '../database/database.service.js';
+import { producto } from '../database/schema.js';
+import { eq } from 'drizzle-orm';
 
 const REPAIR_RADIUS_METERS = 500;
 const REPAIR_MAX_RESULTS = 5;
 const PLACES_FIELD_MASK = [
   'places.displayName',
   'routingSummaries.legs.distanceMeters',
-  'places.googleMapsUri' 
+  'places.googleMapsUri' ,
+  'places.primaryTypeDisplayName'
 ].join(',');
 
 @Injectable()
@@ -32,6 +36,7 @@ export class ScanService {
     @InjectHttpClient('places') private readonly places: HttpClient,
     @InjectHttpClient('upc') private readonly upc: HttpClient,
     private readonly reviewsService: ReviewsService,
+    private readonly drizzle: Drizzle
   ) {}
 
   private readonly logger = new Logger(ScanService.name);
@@ -93,11 +98,30 @@ export class ScanService {
       reseñas: this.valorOrNull(reseñas, 'reseñas') ?? [],
     };
 
+    if (producto && !(await this.exists(barcode)))
+      await this.create(barcode);
+
     this.cache.set(barcode, result, 3600 * 1000).catch((err) =>
       this.logger.warn(`Cache write failed: ${err?.message}`),
-  );
+    );
 
     return result;
+  }
+
+  async create (codigo_producto: string) {
+    await this.drizzle.db
+      .insert(producto)
+      .values({ codigo: codigo_producto });
+  }
+
+  async exists (codigo_producto: string): Promise<boolean> {
+    const result = await this.drizzle.db
+      .select()
+      .from(producto)
+      .where(eq(producto.codigo, codigo_producto))
+      .limit(1);
+
+    return result.length > 0;
   }
 
   private valorOrNull<T>(result: PromiseSettledResult<T>, nombre: string): T | null {
@@ -128,12 +152,13 @@ export class ScanService {
 
   private map_places(response: any | null): RepairPlaceDto[] {
     const data = response?.data;
-    // this.logger.debug(`Places API response: ${JSON.stringify(data)}`);
+    //this.logger.debug(`Places API response: ${JSON.stringify(data)}`);
 
     return (data?.places ?? []).map((place: any, i: number) => ({
       nombre: place.displayName?.text,
       distanciaMetros: data?.routingSummaries?.[i]?.legs?.[0]?.distanceMeters,
       googleMapsUri: place.googleMapsUri,
+      tipo: place.primaryTypeDisplayName.text,
     }));
   }
 }

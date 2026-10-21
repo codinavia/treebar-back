@@ -88,7 +88,7 @@ export class ReviewsService {
     huella_usuario: string,
     codigo_producto: string
   ): Promise<boolean> {
-    const [review] = await await this.drizzle.db
+    const [review] = await this.drizzle.db
       .query
       .criterio
       .findMany({

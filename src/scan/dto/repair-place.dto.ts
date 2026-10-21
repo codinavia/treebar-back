@@ -9,4 +9,7 @@ export class RepairPlaceDto {
 
   @ApiProperty({ description: 'Enlace a Google Maps' })
   googleMapsUri?: string;
+
+  @ApiProperty({ description: 'Tipo de taller de reparación' })
+  tipo?: string;
 }
