@@ -85,6 +85,8 @@ export class ScanService {
     }
 
     if (cached) {
+      this.logger.debug(`Cache hit for barcode ${barcode}`);
+
       return {
         producto: cached.producto,
         reparaciones: cached.reparaciones,
@@ -105,13 +107,18 @@ export class ScanService {
         reseñas: this.valorOrNull(reseñas, 'reseñas') ?? [],
       };
 
-      if (result.producto && !(await this.exists(barcode)))
-        await this.create(barcode);
+      if (result.producto) {
+        if (!(await this.exists(barcode))) await this.create(barcode);
 
-      try {
-        if (result.producto) await this.cache.set(barcode, { producto, reparaciones }, 3600 * 1000);
-      } catch (err) {
-        this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
+        try {
+          await this.cache.set(
+            barcode,
+            { producto: result.producto, reparaciones: result.reparaciones },
+            3600 * 1000,
+          );
+        } catch (err) {
+          this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
+        }
       }
 
       return result;

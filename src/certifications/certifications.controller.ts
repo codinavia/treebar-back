@@ -18,7 +18,6 @@ import {
 export class CertificationsController {
   constructor(private readonly certificationsService: CertificationsService) {}
 
-
   @ApiOperation({ summary: 'Obtiene todas las certificaciones' })
   @Get()
   findAll() {
