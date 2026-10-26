@@ -6,6 +6,9 @@ export class ResponseDto {
 }
 
 export class GetQueriesResponseDto {
+  @ApiProperty({ description: "Identificador único de la duda" })
+  id: number;
+
   @ApiProperty({ description: "Pregunta relacionada al producto dado" })
   pregunta: string;
 

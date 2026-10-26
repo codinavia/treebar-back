@@ -13,7 +13,7 @@ import {
   ApiTags
  } from '@nestjs/swagger';
 import { CreateQueryDto } from './dto/create-query.dto.js';
-import { GetQueriesResponseDto } from './dto/get-queries-response.dto.js';
+import { AnswerQueryDto } from './dto/answer-query.dto.js';
 
 @ApiTags('Dudas')
 @Controller('queries')
@@ -28,12 +28,14 @@ export class QueriesController {
     return this.queriesService.create(createQueryDto);
   }
 
+  @Post('responder')
+  answer(
+    @Body() answerQueryDto: AnswerQueryDto
+  ) {
+    return this.queriesService.answer(answerQueryDto);
+  }
+
   @ApiOperation({ summary: 'Obtiene todas las dudas de un producto' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de preguntas con sus respuestas',
-    type: [GetQueriesResponseDto],
-  })
   @Get(':codigo_producto')
   findAll(
     @Param('codigo_producto') codigo_producto: string
@@ -42,11 +44,6 @@ export class QueriesController {
   }
 
   @ApiOperation({ summary: 'Obtiene las respuestas a una duda específica de un producto' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de respuestas a la duda',
-    type: GetQueriesResponseDto,
-  })
   @Get(':codigo_producto/:pregunta')
   findQueryAnswers(
     @Param('codigo_producto') codigo_producto: string,

@@ -4,7 +4,11 @@ import {
 import { Drizzle } from '../database/database.service.js';
 import { CreateQueryDto } from './dto/create-query.dto.js';
 import { GetQueriesResponseDto } from './dto/get-queries-response.dto.js';
-import { duda } from '../database/schema.js'; 
+import { 
+  duda,
+  respuesta 
+} from '../database/schema.js'; 
+import { AnswerQueryDto } from './dto/answer-query.dto.js';
 
 @Injectable()
 export class QueriesService {
@@ -18,12 +22,19 @@ export class QueriesService {
       .values(CreateQueryDto);
   }
 
+  async answer(AnswerQueryDto: AnswerQueryDto) {
+    await this.drizzle.db
+      .insert(respuesta)
+      .values(AnswerQueryDto);
+  }
+
   async findAll(codigo_producto: string): Promise<GetQueriesResponseDto[]> {
     return await this.drizzle.db
       .query
       .duda
       .findMany({
         columns: {
+          id: true,
           pregunta: true
         },
         where: { codigo_producto },
@@ -46,6 +57,7 @@ export class QueriesService {
       .duda
       .findMany({
         columns: {
+          id: true,
           pregunta: true
         },
         where: { codigo_producto, pregunta },
