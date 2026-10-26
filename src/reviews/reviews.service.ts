@@ -9,7 +9,8 @@ import { GetReviewsResponseDto } from './dto/get-reviews-response.dto.js';
 import { 
   reseña, 
   criterio_calificacion,
-  criterio
+  criterio,
+  usuario
 } from '../database/schema.js';
 
 @Injectable()
@@ -25,12 +26,16 @@ export class ReviewsService {
       comentarios } 
     = createReviewDto;
 
-    if (await this.existsReviewByUser(huella_usuario, codigo_producto)) {
-      throw new 
-        ConflictException(`El usuario con huella ${huella_usuario} ya ha dejado una reseña para el producto ${codigo_producto}`);
-    }
+    // if (await this.existsReviewByUser(huella_usuario, codigo_producto)) {
+    //   throw new 
+    //     ConflictException(`El usuario con huella ${huella_usuario} ya ha dejado una reseña para el producto ${codigo_producto}`);
+    // }
 
     return this.drizzle.db.transaction(async (tx) => {
+      await tx
+        .insert(usuario)
+        .values({ huella: huella_usuario });
+
       await tx
         .insert(reseña)
         .values({ huella_usuario, codigo_producto });
@@ -77,11 +82,13 @@ export class ReviewsService {
   }
 
   async findAllQuestions() {
-    return await this.drizzle.db
-      .select({
-        pregunta: criterio.pregunta
-      })
-      .from(criterio);
+    return this.drizzle.db.query.criterio.findMany({
+      columns: { 
+        id: true, 
+        tipo: true, 
+        pregunta: true 
+      },
+    });
   }
 
   async existsReviewByUser(

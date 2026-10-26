@@ -9,7 +9,6 @@ import {
 import { ReviewsService } from './reviews.service.js';
 import { 
   ApiOperation, 
-  ApiResponse,
   ApiTags
  } from '@nestjs/swagger';
 import { GetReviewsResponseDto } from './dto/get-reviews-response.dto.js';
@@ -29,11 +28,6 @@ export class ReviewsController {
   }
 
   @ApiOperation({ summary: 'Obtiene todas las calificaciones y comentarios de un producto por tipo de criterio evaluado' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de preguntas con sus comentarios y calificaciones',
-    type: [GetReviewsResponseDto], 
-  })
   @Get('producto/:codigo_producto/:tipo')
   findAllByTypeOfCriteria(
     @Param('codigo_producto') codigo_producto: string,
@@ -43,22 +37,12 @@ export class ReviewsController {
   }
 
   @ApiOperation({ summary: 'Obtiene todas las preguntas de los criterios evaluados' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de preguntas',
-    type: [String],
-  })
   @Get('preguntas')
   findAllQuestions() {
     return this.reviewsService.findAllQuestions();
   }
 
   @ApiOperation({ summary: 'Obtiene la reseña de un usuario para un producto específico' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de preguntas con los comentarios y calificaciones del usuario',
-    type: [GetReviewsResponseDto],
-  })
   @Get('usuario/:huella_usuario/:codigo_producto')
   findReviewByUser(
     @Param('huella_usuario') huella_usuario: string,

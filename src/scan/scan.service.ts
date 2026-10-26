@@ -16,6 +16,7 @@ import { LocationDto } from './dto/location.dto.js';
 import { ProductDetailsDto } from './dto/product-details.dto.js';
 import { RepairPlaceDto } from './dto/repair-place.dto.js';
 import { ScanResponseDto } from './dto/scan-response.dto.js';
+import { CachedDto } from './dto/cached.dto.js';
 import { Drizzle } from '../database/database.service.js';
 import { producto } from '../database/schema.js';
 import { eq } from 'drizzle-orm';
@@ -76,15 +77,20 @@ export class ScanService {
     ubicacion: LocationDto,
   ): Promise<ScanResponseDto> {
     
-    let cached: ScanResponseDto | undefined;
+    let cached: CachedDto | undefined;
     try {
-      cached = await this.cache.get<ScanResponseDto>(barcode);
+      cached = await this.cache.get<CachedDto>(barcode);
     } catch (err) {
       this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
     }
 
-    if (cached) 
-       return cached;
+    if (cached) {
+      return {
+        producto: cached.producto,
+        reparaciones: cached.reparaciones,
+        reseñas: await this.reviewsService.findAllByTypeOfCriteria(barcode, 'USO') ?? null,
+      };
+    }
 
     const [producto, reparaciones, reseñas] = await Promise.allSettled([
       this.getProductInfo(barcode),
@@ -92,20 +98,27 @@ export class ScanService {
       this.reviewsService.findAllByTypeOfCriteria(barcode, 'USO'),
     ]);
 
-    const result = {
-      producto: this.map_product(this.valorOrNull(producto, 'producto')),
-      reparaciones: this.map_places(this.valorOrNull(reparaciones, 'reparaciones')),
-      reseñas: this.valorOrNull(reseñas, 'reseñas') ?? [],
-    };
+    try {
+      const result = {
+        producto: this.map_product(this.valorOrNull(producto, 'producto')),
+        reparaciones: this.map_places(this.valorOrNull(reparaciones, 'reparaciones')),
+        reseñas: this.valorOrNull(reseñas, 'reseñas') ?? [],
+      };
 
-    if (producto && !(await this.exists(barcode)))
-      await this.create(barcode);
+      if (result.producto && !(await this.exists(barcode)))
+        await this.create(barcode);
 
-    this.cache.set(barcode, result, 3600 * 1000).catch((err) =>
-      this.logger.warn(`Cache write failed: ${err?.message}`),
-    );
+      try {
+        if (result.producto) await this.cache.set(barcode, { producto, reparaciones }, 3600 * 1000);
+      } catch (err) {
+        this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
+      }
 
-    return result;
+      return result;
+    } catch (err) {
+      this.logger.error('Fallo al armar la respuesta', (err as Error)?.stack);
+      throw err;
+    }
   }
 
   async create (codigo_producto: string) {
@@ -158,7 +171,7 @@ export class ScanService {
       nombre: place.displayName?.text,
       distanciaMetros: data?.routingSummaries?.[i]?.legs?.[0]?.distanceMeters,
       googleMapsUri: place.googleMapsUri,
-      tipo: place.primaryTypeDisplayName.text,
+      tipo: place.primaryTypeDisplayName?.text ?? 'Reparación',
     }));
   }
 }

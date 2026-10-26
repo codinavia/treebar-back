@@ -20,7 +20,6 @@ export class ScanController {
 
   @Get(':barcode')
   @ApiOperation({ summary: 'Escanea un producto y devuelve información sobre él' })
-  @ApiResponse({ status: 200, description: 'Información del producto', type: ScanResponseDto })
   aggregate(
     @Param('barcode') barcode: string,
     @Query() ubicacion: LocationDto,

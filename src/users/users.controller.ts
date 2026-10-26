@@ -28,11 +28,6 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Obtiene un usuario por su huella digital' })
-  @ApiResponse({
-    status: 200,
-    description: 'Usuario encontrado',
-    type: UserDto,
-  })
   @Get(':userId')
   findOne(
     @Param('userId') id: string

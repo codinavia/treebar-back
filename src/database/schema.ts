@@ -45,6 +45,8 @@ export const certificacion = mysqlTable(
   {
     id: varchar('id', { length: 50 }).notNull().primaryKey(),
     url: varchar('url', { length: 255 }).notNull(),
+    descripcion: varchar('descripcion', { length: 650 }).notNull(),
+    nombre: varchar('nombre', { length: 50 }).notNull(),
   }
 );
 
