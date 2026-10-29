@@ -16,7 +16,6 @@ import { LocationDto } from './dto/location.dto.js';
 import { ProductDetailsDto } from './dto/product-details.dto.js';
 import { RepairPlaceDto } from './dto/repair-place.dto.js';
 import { ScanResponseDto } from './dto/scan-response.dto.js';
-import { CachedDto } from './dto/cached.dto.js';
 import { Drizzle } from '../database/database.service.js';
 import { producto } from '../database/schema.js';
 import { eq } from 'drizzle-orm';
@@ -77,45 +76,34 @@ export class ScanService {
     ubicacion: LocationDto,
   ): Promise<ScanResponseDto> {
     
-    let cached: CachedDto | undefined;
+    let cached: ProductDetailsDto | undefined;
     try {
-      cached = await this.cache.get<CachedDto>(barcode);
+      cached = await this.cache.get<ProductDetailsDto>(barcode);
     } catch (err) {
       this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
     }
 
-    if (cached) {
-      this.logger.debug(`Cache hit for barcode ${barcode}`);
-
-      return {
-        producto: cached.producto,
-        reparaciones: cached.reparaciones,
-        reseñas: await this.reviewsService.findAllByTypeOfCriteria(barcode, 'USO') ?? null,
-      };
-    }
-
-    const [producto, reparaciones, reseñas] = await Promise.allSettled([
-      this.getProductInfo(barcode),
+    const [p, reparaciones, reseñas] = await Promise.allSettled([
+      cached ? Promise.resolve(null) : this.getProductInfo(barcode),
       this.searchNearbyPlaces(ubicacion),
       this.reviewsService.findAllByTypeOfCriteria(barcode, 'USO'),
     ]);
 
     try {
+      const producto = 
+        cached ?? this.map_product(this.valorOrNull(p, 'producto'));
+
       const result = {
-        producto: this.map_product(this.valorOrNull(producto, 'producto')),
+        producto,
         reparaciones: this.map_places(this.valorOrNull(reparaciones, 'reparaciones')),
         reseñas: this.valorOrNull(reseñas, 'reseñas') ?? [],
       };
 
-      if (result.producto) {
+      if (producto && !cached) {
         if (!(await this.exists(barcode))) await this.create(barcode);
 
         try {
-          await this.cache.set(
-            barcode,
-            { producto: result.producto, reparaciones: result.reparaciones },
-            3600 * 1000,
-          );
+          await this.cache.set(barcode, producto, 3600 * 1000);
         } catch (err) {
           this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
         }
