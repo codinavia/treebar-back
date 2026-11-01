@@ -1,15 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MaxLength } from 'class-validator';
+import { 
+    MaxLength,
+    IsString, 
+    IsNotEmpty,
+    IsNumber
+} from 'class-validator';
 
 export class AnswerQueryDto {
     @ApiProperty({
-        description: "ID de la duda a la que se responde"
+        description: "Identificador de la duda a la que se responde"
     })
+    @IsNumber()
     id_duda: number;
     
     @ApiProperty({
         description: "Respuesta a la duda"
     })
     @MaxLength(250)
+    @IsString()
+    @IsNotEmpty()
     respuesta: string;
 }

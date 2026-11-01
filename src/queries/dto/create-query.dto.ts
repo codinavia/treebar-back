@@ -11,6 +11,7 @@ export class CreateQueryDto {
     })
     @IsNotEmpty()
     @IsString()
+    @MaxLength(20)
     codigo_producto: string;
     
     @ApiProperty({

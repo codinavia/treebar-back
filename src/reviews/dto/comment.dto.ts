@@ -3,31 +3,17 @@ import {
     IsString, 
     IsNotEmpty,
     IsNumber,
-    IsOptional,
     MaxLength
 } from 'class-validator';
 
 export class CommentDto {
-    // @ApiPropertyOptional({
-    //     description: 'Código del producto al que se le está haciendo la reseña',
-    // })
-    // @IsString()
-    // @IsOptional()
-    // codigo_producto?: string;
-
-    // @ApiPropertyOptional({
-    //     description: 'Huella digital del usuario',
-    // })
-    // @IsString()
-    // @IsOptional()
-    // huella_digital?: string;
-
     @ApiProperty({
         description: 'Identificador del criterio evaluado',
         example: 'USO01'
     })
     @IsString()
     @IsNotEmpty()
+    @MaxLength(10)
     id_criterio: string;
 
     @ApiProperty({

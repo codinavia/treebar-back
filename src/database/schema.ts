@@ -60,9 +60,9 @@ export const criterio = mysqlTable(
 );
 
 export const criterio_calificacion = mysqlTable(
-  'criterio calificacion',
+  'criterio_calificacion',
   {
-    id_criterio: varchar('id_criterio', { length: 20 }).notNull(),
+    id_criterio: varchar('id_criterio', { length: 10 }).notNull(),
     huella_usuario: varchar('huella_usuario', { length: 40 }).notNull(),
     codigo_producto: varchar('codigo_producto', { length: 50 }).notNull(),
     comentario: varchar('comentario', { length: 250 }).notNull(),
@@ -97,7 +97,7 @@ export const duda = mysqlTable(
   'duda',
   {
     id: int('id').autoincrement().primaryKey(),
-    codigo_producto: varchar('codigo_producto', { length: 50 }).notNull(),
+    codigo_producto: varchar('codigo_producto', { length: 20 }).notNull(),
     pregunta: varchar('pregunta', { length: 100 }).notNull(),
   },
   (table) => [
