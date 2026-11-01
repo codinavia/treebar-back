@@ -3,6 +3,7 @@ import {
     IsArray,
     IsNotEmpty, 
     IsString, 
+    MaxLength
 } from 'class-validator';
 import { CommentDto } from './comment.dto.js';
 
@@ -12,12 +13,14 @@ export class CreateReviewDto {
     })
     @IsString()
     @IsNotEmpty()
+    @MaxLength(40)
     huella_usuario: string;
 
     @ApiProperty({
         description: 'Código del producto al que se le está haciendo la reseña'
     })
     @IsString()
+    @MaxLength(20)
     @IsNotEmpty()
     codigo_producto: string;
 
