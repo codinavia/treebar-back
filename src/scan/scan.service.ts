@@ -39,13 +39,15 @@ export class ScanService {
     private readonly drizzle: Drizzle
   ) {}
 
-  private readonly logger = new Logger(ScanService.name);
+  // private readonly logger = new Logger(ScanService.name);
 
   private async searchNearbyPlaces(ubicacion: LocationDto) {
     const origin = {
       latitude: ubicacion.latitud,
       longitude: ubicacion.longitud,
     };
+
+    // this.logger.debug(`Searching nearby places for location: ${JSON.stringify(origin)}`);
 
     const body = {
       textQuery: 'reparación de celulares computadoras y electrónicos',
@@ -61,7 +63,7 @@ export class ScanService {
       json: body,
       headers: { 'X-Goog-FieldMask': PLACES_FIELD_MASK },
     });
-}
+  }
 
   private async getProductInfo(barcode: string) {
     return await this.upc.get<Response>('/:barcode', {
@@ -80,7 +82,7 @@ export class ScanService {
     try {
       cached = await this.cache.get<ProductDetailsDto>(barcode);
     } catch (err) {
-      this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
+      // this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
     }
 
     const [p, reparaciones, reseñas] = await Promise.allSettled([
@@ -99,19 +101,21 @@ export class ScanService {
         reseñas: this.valorOrNull(reseñas, 'reseñas') ?? [],
       };
 
+      const UN_DIA = 24 * 3600 * 1000;
+
       if (producto && !cached) {
         if (!(await this.exists(barcode))) await this.create(barcode);
 
         try {
-          await this.cache.set(barcode, producto, 3600 * 1000);
+          await this.cache.set(barcode, producto, 7 * UN_DIA);
         } catch (err) {
-          this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
+          // this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
         }
       }
 
       return result;
     } catch (err) {
-      this.logger.error('Fallo al armar la respuesta', (err as Error)?.stack);
+      // this.logger.error('Fallo al armar la respuesta', (err as Error)?.stack);
       throw err;
     }
   }
