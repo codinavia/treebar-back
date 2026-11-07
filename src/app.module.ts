@@ -41,7 +41,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       }),
     }),
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: '.env.production',
     }),
     ReviewsModule,
     CertificationsModule,
