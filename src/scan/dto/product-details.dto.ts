@@ -45,6 +45,8 @@ export class ProductDetailsDto {
   })
   especificaciones?: Record<string, string>;
   
-  @ApiProperty({ description: 'true si Go-UPC dedujo los datos' }) 
+  @ApiProperty({ 
+    description: 'true si Go-UPC dedujo los datos' 
+  }) 
   inferido: boolean;
 }

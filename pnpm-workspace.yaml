@@ -1,6 +1,7 @@
 allowBuilds:
   '@scarf/scarf': false
   esbuild: true
+  protobufjs: true
 
 overrides:
   undici: ">=7.24.0"

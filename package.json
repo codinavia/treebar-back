@@ -22,6 +22,7 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
   },
   "dependencies": {
+    "@google-cloud/translate": "^10.3.0",
     "@keyv/redis": "^5.1.6",
     "@nestjs/cache-manager": "^12.0.0",
     "@nestjs/common": "^12.0.1",

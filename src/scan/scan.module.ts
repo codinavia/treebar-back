@@ -18,10 +18,22 @@ import { ScanController } from './scan.controller.js';
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': config.getOrThrow<string>('PLACES_API_KEY'),
+          'X-Goog-Api-Key': config.getOrThrow<string>('GOOGLE_API_KEY'),
         },
       }),
-
+    }),
+    HttpClientModule.registerAsync({
+      name: 'translate',
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        baseUrl: 'https://translation.googleapis.com/language/translate/v2',
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'X-Goog-Api-Key': config.getOrThrow<string>('GOOGLE_API_KEY'),
+        },
+      }),
     }),
     HttpClientModule.registerAsync({
       name: 'upc',
