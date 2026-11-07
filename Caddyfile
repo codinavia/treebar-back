@@ -1,0 +1,16 @@
+{
+    email ${ACME_EMAIL}
+}
+
+treebarapp.mexicocentral.cloudapp.azure.com {
+    handle /api/* {
+        reverse_proxy localhost:3000
+    }
+
+    handle {
+        root * /var/www/treebar/dist
+        file_server
+    }
+
+    encode zstd gzip
+}
