@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+
 CREATE TABLE `certificacion` (
 	`id` varchar(50) PRIMARY KEY,
 	`url` varchar(255) NOT NULL,

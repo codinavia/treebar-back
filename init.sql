@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+
 -- Certificaciones
 INSERT INTO certificacion (id, url, descripcion, nombre)
 VALUES (
