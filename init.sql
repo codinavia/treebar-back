@@ -28,12 +28,11 @@ VALUES (
 -- Criterios
 INSERT INTO `criterio` (`id`, `tipo`, `pregunta`)
 VALUES
-  ('uso01', 'uso', '¿Cómo utiliza el producto?'),
-  ('uso02', 'uso', '¿Para qué actividades lo emplea?'),
-  ('frec01', 'frec', '¿Con qué frecuencia lo usa?'),
-  ('dura01', 'dura', '¿Cuánto tiempo lleva usándolo?'),
+  ('uso01', 'uso', '¿Qué aplicación o programas usas con mayor frecuencia en el aparato?'),
+  ('uso02', 'uso', '¿Cómo consideras que es el rendimiento del aparato acorde con las actividades que realizas con él?'),
+  ('frec01', 'frec', '¿Con qué frecuencia lo utilizas?'),
+  ('dura01', 'dura', '¿Cuánto tiempo llevas usándolo?'),
   ('dura02', 'dura', '¿Ha presentado desgaste?'),
-  ('repa01', 'repa', '¿Fue fácil conseguir refacciones?'),
-  ('repa02', 'repa', '¿Ha necesitado repararlo?'),
+  ('repa01', 'repa', '¿Ha necesitado repararlo? Si tu respuesta es sí, ¿qué tan fácil fue conseguir la reparación?'),
   ('sust01', 'sust', '¿El producto es amigable con el medio ambiente?'),
   ('dese01', 'dese', '¿Cumple lo prometido por el fabricante?');
