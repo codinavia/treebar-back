@@ -18,7 +18,7 @@ import { RepairPlaceDto } from './dto/repair-place.dto.js';
 import { ScanResponseDto } from './dto/scan-response.dto.js';
 import { Drizzle } from '../database/database.service.js';
 import { producto } from '../database/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 const REPAIR_RADIUS_METERS = 500;
 const REPAIR_MAX_RESULTS = 5;
@@ -239,7 +239,7 @@ export class ScanService {
 
   async aggregate (
     barcode: string,
-    ubicacion: LocationDto | null,
+    ubicacion: LocationDto | null
   ): Promise<ScanResponseDto> {
     
     let cached: ProductDetailsDto | undefined;
@@ -274,7 +274,7 @@ export class ScanService {
       const UN_DIA = 24 * 3600 * 1000;
 
       if (producto && !cached) {
-        if (!(await this.exists(barcode))) await this.create(barcode);
+        if (!(await this.exists(barcode))) await this.create(barcode, producto.nombre);
 
         try {
           await this.cache.set(barcode, producto, 7 * UN_DIA);
@@ -318,6 +318,33 @@ export class ScanService {
         query: { format: 'true' },
       }
     );
+  }
+
+  async create (codigo_producto: string, nombre: string) {
+    await this.drizzle.db
+      .insert(producto)
+      .values({ codigo: codigo_producto, nombre });
+  }
+
+  async exists (codigo_producto: string): Promise<boolean> {
+    const result = await this.drizzle.db
+      .select()
+      .from(producto)
+      .where(eq(producto.codigo, codigo_producto))
+      .limit(1);
+
+    return result.length > 0;
+  }
+
+  async scanned (): Promise<{ codigo: string, nombre: string }[]> {
+    return await this.drizzle.db
+      .select({ 
+        codigo: producto.codigo,
+        nombre: producto.nombre 
+      })
+      .from(producto)
+      .orderBy(desc(producto.fecha_registro), desc(producto.codigo))
+      .limit(10);
   }
 
   private async translate(
@@ -391,22 +418,6 @@ export class ScanService {
         specs.map(([k, v]) => [ETIQUETAS[k] ?? g(k), esMedida(v) ? v : g(v)]),
       ),
     };
-  }
-
-  async create (codigo_producto: string) {
-    await this.drizzle.db
-      .insert(producto)
-      .values({ codigo: codigo_producto });
-  }
-
-  async exists (codigo_producto: string): Promise<boolean> {
-    const result = await this.drizzle.db
-      .select()
-      .from(producto)
-      .where(eq(producto.codigo, codigo_producto))
-      .limit(1);
-
-    return result.length > 0;
   }
 
   private valor_or_null<T>(result: PromiseSettledResult<T>, nombre: string): T | null {

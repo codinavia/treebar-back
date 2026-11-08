@@ -11,12 +11,17 @@ import {
 } from '@nestjs/swagger';
 import { ScanService } from './scan.service.js';
 import { LocationDto } from './dto/location.dto.js';
-import { ScanResponseDto } from './dto/scan-response.dto.js';
 
 @ApiTags('Escaner')
 @Controller('scan')
 export class ScanController {
   constructor(private readonly scanService: ScanService) {}
+
+  @Get('recientes')
+  @ApiOperation({ summary: 'Devuelve los productos escaneados recientemente' })
+  recientes() {
+    return this.scanService.scanned();
+  }
 
   @Get(':barcode')
   @ApiOperation({ summary: 'Escanea un producto y devuelve información sobre él' })

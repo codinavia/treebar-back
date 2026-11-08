@@ -2,9 +2,10 @@ import {
   mysqlTable,
   int,
   varchar,
-  float,
   foreignKey,
-  primaryKey
+  primaryKey,
+  timestamp,
+  index,
 } from 'drizzle-orm/mysql-core';
 import { defineRelations } from 'drizzle-orm';
 
@@ -17,8 +18,14 @@ export const usuario = mysqlTable(
 export const producto = mysqlTable(
   'producto', 
   {  
-  codigo: varchar('codigo', { length: 50 }).notNull().primaryKey(),
-});
+    codigo: varchar('codigo', { length: 50 }).notNull().primaryKey(),
+    fecha_registro: timestamp('fecha_registro').notNull().defaultNow(),
+    nombre: varchar('nombre', { length: 100 }).notNull(),
+  },
+  (table) => [
+    index("idx_fecha").on(table.fecha_registro),
+  ]
+);
 
 export const reseña = mysqlTable(
   'reseña', 
@@ -55,7 +62,7 @@ export const criterio = mysqlTable(
   {
     id: varchar('id', { length: 20 }).primaryKey(),
     tipo: varchar('tipo', { length: 20 }).notNull(),
-    pregunta: varchar('pregunta', { length: 50 }).notNull(),
+    pregunta: varchar('pregunta', { length: 100 }).notNull(),
   }
 );
 
