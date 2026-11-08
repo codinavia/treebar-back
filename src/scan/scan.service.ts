@@ -244,7 +244,8 @@ export class ScanService {
     
     let cached: ProductDetailsDto | undefined;
     try {
-      cached = await this.cache.get<ProductDetailsDto>(barcode);
+      cached = 
+        await this.cache.get<ProductDetailsDto>(barcode);
     } catch (err) {
       this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
     }
@@ -273,13 +274,16 @@ export class ScanService {
 
       const UN_DIA = 24 * 3600 * 1000;
 
-      if (producto && !cached) {
+      if (producto) {
         if (!(await this.exists(barcode))) await this.create(barcode, producto.nombre);
+        else await this.update(barcode);
 
-        try {
-          await this.cache.set(barcode, producto, 7 * UN_DIA);
-        } catch (err) {
-          this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
+        if (!cached) {
+          try {
+            await this.cache.set(barcode, producto, 7 * UN_DIA);
+          } catch (err) {
+            this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
+          }
         }
       }
 
@@ -324,6 +328,13 @@ export class ScanService {
     await this.drizzle.db
       .insert(producto)
       .values({ codigo: codigo_producto, nombre });
+  }
+
+  async update (codigo_producto: string) {
+    await this.drizzle.db
+      .update(producto)
+      .set({ fecha_registro: new Date() })
+      .where(eq(producto.codigo, codigo_producto));
   }
 
   async exists (codigo_producto: string): Promise<boolean> {
