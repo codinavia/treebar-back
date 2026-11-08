@@ -26,10 +26,10 @@ export class ReviewsService {
       comentarios } 
     = createReviewDto;
 
-    // if (await this.existsReviewByUser(huella_usuario, codigo_producto)) {
-    //   throw new 
-    //     ConflictException(`El usuario con huella ${huella_usuario} ya ha dejado una reseña para el producto ${codigo_producto}`);
-    // }
+    if (await this.existsReviewByUser(huella_usuario, codigo_producto)) {
+      throw new 
+        ConflictException(`El usuario con huella ${huella_usuario} ya ha dejado una reseña para el producto ${codigo_producto}`);
+    }
 
     return this.drizzle.db.transaction(async (tx) => {
       await tx
@@ -48,7 +48,6 @@ export class ReviewsService {
             codigo_producto,
             id_criterio: c.id_criterio,
             comentario: c.comentario,
-            calificacion: c.calificacion,
           })),
       );
   });
@@ -71,7 +70,6 @@ export class ReviewsService {
             columns: {
               id_criterio: true,
               comentario: true,
-              calificacion: true,
             },
             where: { codigo_producto },  
           },
@@ -93,23 +91,20 @@ export class ReviewsService {
 
   async existsReviewByUser(
     huella_usuario: string,
-    codigo_producto: string
+    codigo_producto: string,
   ): Promise<boolean> {
-    const [review] = await this.drizzle.db
+    const review = await this.drizzle.db
       .query
-      .criterio
-      .findMany({
-        with: {
-          calificaciones: {
-            where: { huella_usuario, codigo_producto },  
-          },
+      .reseña
+      .findFirst({
+        columns: { 
+          huella_usuario: true 
         },
-      });
-    
-    if (!review)
-      return false;
-
-    return true;
+        where: { 
+          huella_usuario, codigo_producto 
+        },
+    });
+    return !!review;
   }
 
   async findReviewByUser(
@@ -129,7 +124,6 @@ export class ReviewsService {
             columns: {
               id_criterio: true,
               comentario: true,
-              calificacion: true,
             },
             where: { huella_usuario, codigo_producto },  
           },

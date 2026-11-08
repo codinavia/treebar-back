@@ -30,7 +30,7 @@ const PLACES_FIELD_MASK = [
 ].join(',');
 
 const ETIQUETAS: Record<string, string> = {
-  // Construcción y diseño
+  // Construcción
   Build: 'Materiales',
   'Build Quality': 'Calidad de construcción',
   Body: 'Cuerpo',
@@ -98,7 +98,7 @@ const ETIQUETAS: Record<string, string> = {
   Fan: 'Ventilador',
   Thermal: 'Térmico',
 
-  // Batería y carga
+  // Batería
   Battery: 'Batería',
   'Battery Life': 'Duración de la batería',
   'Battery Capacity': 'Capacidad de la batería',
@@ -114,7 +114,7 @@ const ETIQUETAS: Record<string, string> = {
   Runtime: 'Autonomía',
   Standby: 'En espera',
 
-  // Cámara y audio
+  // Cámara
   Camera: 'Cámara',
   'Rear Camera': 'Cámara trasera',
   'Front Camera': 'Cámara frontal',
@@ -154,7 +154,7 @@ const ETIQUETAS: Record<string, string> = {
   'Card Reader': 'Lector de tarjetas',
   'Memory Card': 'Tarjeta de memoria',
 
-  // Software y seguridad
+  // Software
   OS: 'Sistema operativo',
   'Operating System': 'Sistema operativo',
   Software: 'Software',
@@ -246,7 +246,7 @@ export class ScanService {
     try {
       cached = await this.cache.get<ProductDetailsDto>(barcode);
     } catch (err) {
-      // this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
+      this.logger.warn(`Cache retrieval failed: ${(err as Error)?.message}`);
     }
 
     const [p, reparaciones, reseñas] = await Promise.allSettled([
@@ -279,13 +279,13 @@ export class ScanService {
         try {
           await this.cache.set(barcode, producto, 7 * UN_DIA);
         } catch (err) {
-          // this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
+          this.logger.warn(`Cache write failed: ${(err as Error)?.message}`);
         }
       }
 
       return result;
     } catch (err) {
-      // this.logger.error('Fallo al armar la respuesta', (err as Error)?.stack);
+      this.logger.error('Fallo al armar la respuesta', (err as Error)?.stack);
       throw err;
     }
   }
@@ -379,7 +379,7 @@ export class ScanService {
     const lista = [...translate];
     const t = await this.translate(lista);
 
-    // texto original -> texto traducido
+    // Texto original -> Texto traducido
     const mapa = new Map(lista.map((s, i) => [s, t[i] ?? s]));
     const g = (s: string) => mapa.get(s) ?? s;
 
@@ -412,11 +412,11 @@ export class ScanService {
   private valor_or_null<T>(result: PromiseSettledResult<T>, nombre: string): T | null {
     if (result.status === 'fulfilled') 
       return result.value;
-    // const reason: any = result.reason;
-    // this.logger.warn(
-    //   `Falló la carga de ${nombre}: ${reason?.message}`,
-    //   JSON.stringify(reason?.body ?? reason?.response?.body ?? reason?.data ?? Object.keys(reason ?? {})),
-    // );
+    const reason: any = result.reason;
+    this.logger.warn(
+      `Falló la carga de ${nombre}: ${reason?.message}`,
+      JSON.stringify(reason?.body ?? reason?.response?.body ?? reason?.data ?? Object.keys(reason ?? {})),
+    );
     return null;
   }
 
@@ -439,7 +439,6 @@ export class ScanService {
 
   private map_places(response: any | null): RepairPlaceDto[] {
     const data = response?.data;
-    //this.logger.debug(`Places API response: ${JSON.stringify(data)}`);
 
     return (data?.places ?? []).map((place: any, i: number) => ({
       nombre: place.displayName?.text,

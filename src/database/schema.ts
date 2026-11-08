@@ -66,7 +66,6 @@ export const criterio_calificacion = mysqlTable(
     huella_usuario: varchar('huella_usuario', { length: 40 }).notNull(),
     codigo_producto: varchar('codigo_producto', { length: 50 }).notNull(),
     comentario: varchar('comentario', { length: 250 }).notNull(),
-    calificacion: float('calificacion').notNull(),
   },
   (table) => [
     foreignKey({

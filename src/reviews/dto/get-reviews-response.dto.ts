@@ -6,7 +6,7 @@ export class GetReviewsResponseDto {
     pregunta: string;
 
     @ApiProperty({
-        description: 'Arreglo de comentarios y calificaciones del producto',
+        description: 'Arreglo de comentarios  del producto',
         type: [CommentDto],
     })
     calificaciones: CommentDto[];

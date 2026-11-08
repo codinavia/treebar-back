@@ -27,7 +27,7 @@ export class ReviewsController {
     return this.reviewsService.create(createReviewDto);
   }
 
-  @ApiOperation({ summary: 'Obtiene todas las calificaciones y comentarios de un producto por tipo de criterio evaluado' })
+  @ApiOperation({ summary: 'Obtiene todas los comentarios de un producto por tipo de criterio evaluado' })
   @Get('producto/:codigo_producto/:tipo')
   findAllByTypeOfCriteria(
     @Param('codigo_producto') codigo_producto: string,

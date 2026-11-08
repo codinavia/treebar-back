@@ -23,11 +23,4 @@ export class CommentDto {
     @IsNotEmpty()
     @MaxLength(250)
     comentario: string;
-
-    @ApiProperty({
-        description: 'Calificación en una escala del 1 al 5 del producto en base al criterio evaluado',
-    })
-    @IsNumber()
-    @IsNotEmpty()
-    calificacion: number;
 }

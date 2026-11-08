@@ -17,8 +17,7 @@ CREATE TABLE `criterio_calificacion` (
 	`id_criterio` varchar(10) NOT NULL,
 	`huella_usuario` varchar(40) NOT NULL,
 	`codigo_producto` varchar(20) NOT NULL,
-	`comentario` varchar(250) NOT NULL,
-	`calificacion` float NOT NULL
+	`comentario` varchar(250) NOT NULL
 );
 
 CREATE TABLE `duda` (
