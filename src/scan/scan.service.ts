@@ -239,7 +239,7 @@ export class ScanService {
 
   async aggregate (
     barcode: string,
-    ubicacion: LocationDto,
+    ubicacion: LocationDto | null,
   ): Promise<ScanResponseDto> {
     
     let cached: ProductDetailsDto | undefined;
@@ -251,7 +251,7 @@ export class ScanService {
 
     const [p, reparaciones, reseñas] = await Promise.allSettled([
       cached ? Promise.resolve(null) : this.getProductInfo(barcode),
-      this.searchNearbyPlaces(ubicacion),
+      ubicacion ? this.searchNearbyPlaces(ubicacion) : Promise.resolve(null),
       this.reviewsService.findAllByTypeOfCriteria(barcode, 'USO'),
     ]);
 

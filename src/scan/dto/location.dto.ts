@@ -1,24 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { 
     IsLatitude, 
     IsLongitude, 
-    IsNotEmpty 
+    IsOptional, 
 } from 'class-validator';
 
 export class LocationDto {
-    @ApiProperty({
-        description: 'Latitud de la ubicación',
-        example: 40.7128,
-    })
-    @IsLatitude()
-    @IsNotEmpty()
-    latitud: number;
+  @IsOptional() @Type(() => Number) @IsLatitude()
+  latitud?: number;
 
-    @ApiProperty({
-        description: 'Longitud de la ubicación',
-        example: -74.0060,
-    })
-    @IsLongitude()
-    @IsNotEmpty()
-    longitud: number;
+  @IsOptional() @Type(() => Number) @IsLongitude()
+  longitud?: number;
 }
