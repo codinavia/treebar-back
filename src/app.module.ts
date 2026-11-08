@@ -27,6 +27,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         },
       ],
     }),
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
@@ -39,9 +42,6 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         ],
         ttl: 60_000,
       }),
-    }),
-    ConfigModule.forRoot({
-      envFilePath: '.env.production',
     }),
     ReviewsModule,
     CertificationsModule,
